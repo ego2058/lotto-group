@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דאבל לוטו</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #E8001D;
+    --gold: #FFD700;
+    --dark: #1a1a2e;
+    --mid: #16213e;
+    --light: #0f3460;
+    --white: #ffffff;
+    --gray: #cccccc;
+    --selected: #E8001D;
+    --ball-size: 38px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--dark);
+    color: var(--white);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px 40px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .header h1 {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255,215,0,0.5);
+    letter-spacing: 2px;
+  }
+
+  .header .subtitle {
+    font-size: 1rem;
+    color: var(--gray);
+    margin-top: 4px;
+  }
+
+  .date-badge {
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 4px 16px;
+    border-radius: 20px;
+    margin-top: 8px;
+  }
+
+  .form-container {
+    width: 100%;
+    max-width: 680px;
+  }
+
+  .section-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* DATBAL TABLE */
+  .datbal-table {
+    background: var(--mid);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 0 30px rgba(255,215,0,0.15);
+  }
+
+  .table-header {
+    background: linear-gradient(135deg, var(--red), #8B0000);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .table-header .title {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+
+  .table-header .price {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.9);
+    text-align: left;
+  }
+
+  /* Grid of rows */
+  .rows-wrapper {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .lotto-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: background 0.2s;
+  }
+
+  .lotto-row:hover {
+    background: rgba(255,255,255,0.07);
+  }
+
+  .row-label {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--gold);
+    width: 22px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .balls-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    flex: 1;
+  }
+
+  .ball {
+    width: var(--ball-size);
+    height: var(--ball-size);
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.25);
+    background: var(--light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    color: var(--gray);
+    flex-shrink: 0;
+  }
+
+  .ball:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: scale(1.1);
+  }
+
+  .ball.selected {
+    background: var(--red);
+    border-color: var(--red);
+    color: white;
+    box-shadow: 0 0 10px rgba(232,0,29,0.6);
+    transform: scale(1.05);
+  }
+
+  .ball.strong {
+    background: var(--light);
+    border-color: rgba(255,215,0,0.4);
+    color: var(--gold);
+  }
+
+  .ball.strong:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: scale(1.1);
+  }
+
+  .ball.strong.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--dark);
+    box-shadow: 0 0 12px rgba(255,215,0,0.7);
+  }
+
+  .divider {
+    width: 2px;
+    height: 30px;
+    background: rgba(255,255,255,0.15);
+    flex-shrink: 0;
+  }
+
+  .count-badge {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.5);
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .count-badge span {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* ACTIONS */
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Heebo', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-quick {
+    background: linear-gradient(135deg, var(--gold), #e6b800);
+    color: var(--dark);
+  }
+
+  .btn-quick:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(255,215,0,0.4);
+  }
+
+  .btn-clear {
+    background: rgba(255,255,255,0.1);
+    color: var(--white);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .btn-clear:hover {
+    background: rgba(255,255,255,0.15);
+  }
+
+  /* SUMMARY */
+  .summary-box {
+    background: var(--mid);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 0.9rem;
+    color: var(--gray);
+  }
+
+  .summary-row.total {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 8px;
+    padding-top: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  .summary-row .val {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* SUBMIT */
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--red), #8B0000);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(232,0,29,0.4);
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(232,0,29,0.6);
+  }
+
+  .btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--gold);
+    color: var(--dark);
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 30px;
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+    z-index: 100;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Jackpot display */
+  .jackpot {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 14px;
+    background: linear-gradient(135deg, #1a0005, #2d0010);
+    border: 1px solid rgba(232,0,29,0.3);
+    border-radius: 10px;
+  }
+
+  .jackpot .label { font-size: 0.8rem; color: var(--gray); }
+  .jackpot .amount {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255,215,0,0.4);
+  }
+  .jackpot .amount span { font-size: 1.1rem; }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    font-size: 0.75rem;
+    color: var(--gray);
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: var(--light);
+  }
+  .legend-dot.red { background: var(--red); border-color: var(--red); }
+  .legend-dot.gold { background: var(--gold); border-color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎱 דאבל לוטו</h1>
+  <div class="subtitle">בחרו 6 מספרים + מספר חזק לכל שורה</div>
+  <div class="date-badge">הגרלה: יום ראשון 17.05.2026</div>
+</div>
+
+<div class="jackpot">
+  <div class="label">פרס ראשון משוער</div>
+  <div class="amount">₪<span>12,000,000</span></div>
+</div>
+
+<div class="form-container">
+  <div class="actions">
+    <button class="btn btn-quick" onclick="quickPick()">🎲 מילוי אוטומטי</button>
+    <button class="btn btn-clear" onclick="clearAll()">🗑️ נקה הכל</button>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot red"></div> מספר נבחר</div>
+    <div class="legend-item"><div class="legend-dot gold"></div> מספר חזק נבחר</div>
+  </div>
+
+  <div class="section-label">טופס דאבל לוטו — 10 שורות</div>
+
+  <div class="datbal-table">
+    <div class="table-header">
+      <span class="title">🎯 דאבל לוטו — 10 שורות</span>
+      <span class="price">מחיר: ₪80</span>
+    </div>
+    <div class="rows-wrapper" id="rowsContainer"></div>
+  </div>
+
+  <div class="summary-box" id="summaryBox">
+    <div class="summary-row"><span>שורה א׳</span><span class="val" id="row0status">0/6 מספרים + חזק 0/1</span></div>
+    <div class="summary-row"><span>שורה ב׳</span><span class="val" id="row1status">0/6 מספרים + חזק 0/1</span></div>
+    <div class="summary-row"><span>שורה ג׳</span><span class="val" id="row2status">0/6 מספרים + חזק 0/1</span></div>
+    <div class="summary-row"><span>שורה ד׳</span><span class="val" id="row3status">0/6 מספרים + חזק 0/1</span></div>
+    <div class="summary-row"><span>שורה ה׳</span><span class="val" id="row4status">0/6 מספרים + חזק 0/1</span></div>
+    <div class="summary-row"><span>שורה ו׳</span><span class="val" id="row5status">0/6 מספרים + חזק 0/1</span></div>
+    <div class="summary-row"><span>שורה ז׳</span><span class="val" id="row6status">0/6 מספרים + חזק 0/1</span></div>
+    <div class="summary-row"><span>שורה ח׳</span><span class="val" id="row7status">0/6 מספרים + חזק 0/1</span></div>
+    <div class="summary-row"><span>שורה ט׳</span><span class="val" id="row8status">0/6 מספרים + חזק 0/1</span></div>
+    <div class="summary-row"><span>שורה י׳</span><span class="val" id="row9status">0/6 מספרים + חזק 0/1</span></div>
+    <div class="summary-row total">
+      <span>סה״כ לתשלום</span>
+      <span class="val">₪80</span>
+    </div>
+  </div>
+
+  <button class="btn-submit" id="submitBtn" onclick="submitForm()" disabled>
+    🎫 שלח טופס להגרלה
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const ROWS = 10;
+  const MAIN_COUNT = 37;
+  const STRONG_COUNT = 7;
+  const NEED_MAIN = 6;
+  const NEED_STRONG = 1;
+
+  const state = Array.from({length: ROWS}, () => ({
+    main: new Set(),
+    strong: new Set()
+  }));
+
+  const rowLabels = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י'];
+
+  function buildRows() {
+    const container = document.getElementById('rowsContainer');
+    container.innerHTML = '';
+
+    for (let r = 0; r < ROWS; r++) {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'lotto-row';
+      rowEl.style.flexDirection = 'column';
+      rowEl.style.gap = '8px';
+
+      // Row header
+      const header = document.createElement('div');
+      header.style.cssText = 'display:flex;align-items:center;gap:8px;width:100%';
+      const lbl = document.createElement('div');
+      lbl.className = 'row-label';
+      lbl.textContent = `שורה ${rowLabels[r]}`;
+      lbl.style.width = 'auto';
+      header.appendChild(lbl);
+      rowEl.appendChild(header);
+
+      // Main numbers
+      const mainLabel = document.createElement('div');
+      mainLabel.style.cssText = 'font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:2px';
+      mainLabel.textContent = 'בחר 6 מספרים (1–37)';
+      rowEl.appendChild(mainLabel);
+
+      const mainBalls = document.createElement('div');
+      mainBalls.className = 'balls-container';
+      mainBalls.id = `main-${r}`;
+
+      for (let n = 1; n <= MAIN_COUNT; n++) {
+        const ball = document.createElement('div');
+        ball.className = 'ball';
+        ball.textContent = n;
+        ball.dataset.row = r;
+        ball.dataset.num = n;
+        ball.dataset.type = 'main';
+        ball.onclick = () => toggleBall(r, n, 'main', ball);
+        mainBalls.appendChild(ball);
+      }
+      rowEl.appendChild(mainBalls);
+
+      // Strong number
+      const strongLabel = document.createElement('div');
+      strongLabel.style.cssText = 'font-size:0.72rem;color:rgba(255,215,0,0.5);margin-top:4px;margin-bottom:2px';
+      strongLabel.textContent = '⭐ מספר חזק (1–7)';
+      rowEl.appendChild(strongLabel);
+
+      const strongBalls = document.createElement('div');
+      strongBalls.className = 'balls-container';
+      strongBalls.id = `strong-${r}`;
+
+      for (let n = 1; n <= STRONG_COUNT; n++) {
+        const ball = document.createElement('div');
+        ball.className = 'ball strong';
+        ball.textContent = n;
+        ball.dataset.row = r;
+        ball.dataset.num = n;
+        ball.dataset.type = 'strong';
+        ball.onclick = () => toggleBall(r, n, 'strong', ball);
+        strongBalls.appendChild(ball);
+      }
+      rowEl.appendChild(strongBalls);
+
+      container.appendChild(rowEl);
+    }
+  }
+
+  function toggleBall(row, num, type, el) {
+    const s = state[row][type];
+    const limit = type === 'main' ? NEED_MAIN : NEED_STRONG;
+
+    if (s.has(num)) {
+      s.delete(num);
+      el.classList.remove('selected');
+    } else {
+      if (s.size >= limit) {
+        showToast(type === 'main' ? `כבר בחרת ${limit} מספרים בשורה` : 'כבר בחרת מספר חזק');
+        return;
+      }
+      s.add(num);
+      el.classList.add('selected');
+    }
+    updateSummary();
+  }
+
+  function updateSummary() {
+    let allDone = true;
+    for (let r = 0; r < ROWS; r++) {
+      const mainDone = state[r].main.size === NEED_MAIN;
+      const strongDone = state[r].strong.size === NEED_STRONG;
+      const el = document.getElementById(`row${r}status`);
+      el.textContent = `${state[r].main.size}/6 מספרים + חזק ${state[r].strong.size}/1`;
+      el.style.color = (mainDone && strongDone) ? '#4CAF50' : '#FFD700';
+      if (!mainDone || !strongDone) allDone = false;
+    }
+    document.getElementById('submitBtn').disabled = !allDone;
+  }
+
+  function quickPick() {
+    for (let r = 0; r < ROWS; r++) {
+      // Clear
+      state[r].main.clear();
+      state[r].strong.clear();
+
+      // Pick 6 main
+      const mainPool = Array.from({length: MAIN_COUNT}, (_, i) => i + 1);
+      shuffle(mainPool);
+      mainPool.slice(0, NEED_MAIN).forEach(n => state[r].main.add(n));
+
+      // Pick 1 strong
+      const strongPool = Array.from({length: STRONG_COUNT}, (_, i) => i + 1);
+      shuffle(strongPool);
+      strongPool.slice(0, NEED_STRONG).forEach(n => state[r].strong.add(n));
+    }
+    refreshBalls();
+    updateSummary();
+    showToast('מספרים נבחרו אוטומטית! 🎲');
+  }
+
+  function clearAll() {
+    for (let r = 0; r < ROWS; r++) {
+      state[r].main.clear();
+      state[r].strong.clear();
+    }
+    refreshBalls();
+    updateSummary();
+  }
+
+  function refreshBalls() {
+    for (let r = 0; r < ROWS; r++) {
+      // Main
+      const mainContainer = document.getElementById(`main-${r}`);
+      mainContainer.querySelectorAll('.ball').forEach(ball => {
+        const n = parseInt(ball.dataset.num);
+        ball.classList.toggle('selected', state[r].main.has(n));
+      });
+      // Strong
+      const strongContainer = document.getElementById(`strong-${r}`);
+      strongContainer.querySelectorAll('.ball.strong').forEach(ball => {
+        const n = parseInt(ball.dataset.num);
+        ball.classList.toggle('selected', state[r].strong.has(n));
+      });
+    }
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function submitForm() {
+    let msg = '🎱 הטופס שלך:\n';
+    for (let r = 0; r < ROWS; r++) {
+      const main = [...state[r].main].sort((a,b)=>a-b).join(', ');
+      const strong = [...state[r].strong].join('');
+      msg += `שורה ${rowLabels[r]}: [${main}] + חזק [${strong}]\n`;
+    }
+    showToast('✅ הטופס נשלח בהצלחה! בהצלחה!');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  buildRows();
+  updateSummary();
+</script>
+</body>
+</html>
